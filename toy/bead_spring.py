@@ -280,7 +280,7 @@ def del_shannon_etpy(trj, T1, T2):
         etpy_avg[:, it] = pt - p0
         p0 = pt
 
-    return etpy_avg
+    return etpy_avg[1:]
 
 
 def del_medium_etpy(trj, T1, T2):
@@ -332,7 +332,7 @@ def del_medium_etpy(trj, T1, T2):
 
         x = trj[:, :, it]
 
-    return etpy
+    return etpy[1:]
 
 
 def analytic_etpy(num_beads, T1, T2):
