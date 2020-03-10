@@ -16,6 +16,8 @@ def sampling(num_beads, T1, T2, iter=1000):
     Returns:
       Sampled statesfrom the probability density in steady state. 
     """
+    assert (num_beads == 2) or (num_beads==5), "'num_beads' must be 2 or 5"
+
     if num_beads == 2:
         cov = [ [(7*T1 + T2)/(12.*k),(T1 + T2)/(6.*k)], [(T1 + T2)/(6.*k), (T1 + 7*T2)/(12.*k)]]
         positions = np.random.multivariate_normal(np.zeros((2,)), cov, iter)
@@ -29,10 +31,6 @@ def sampling(num_beads, T1, T2, iter=1000):
             [(T1 + T2)/(12.*k),(299*T1 + 361*T2)/(1980.*k),(371*T1 + 619*T2)/(1980.*k),(173*T1 + 487*T2)/(990.*k),(173*T1 + 1477*T2)/(1980.*k)]]
 
         positions = np.random.multivariate_normal(np.zeros((5,)), cov, iter)
-    
-    else:
-        print("Not defined model")
-        return -1
 
     return positions
 
@@ -49,6 +47,8 @@ def p_ss(num_beads, x, T1, T2):
     Returns:
       Probability that beads is at x.
     """
+    assert (num_beads == 2) or (num_beads==5), "'num_beads' must be 2 or 5"
+
     if num_beads == 2:
         x1, x2 = x[:, 0], x[:, 1]
         return np.exp(-0.5*(4*k*(T2*(7*x1**2 - 4*x1*x2 + x2**2) + T1*(x1**2 - 4*x1*x2 + 7*x2**2)))/(T1**2 + 14*T1*T2 + T2**2))
@@ -69,11 +69,10 @@ def p_ss(num_beads, x, T1, T2):
 
     return -1
 
-def shannon_etpy(num_beads, trj, T1, T2):
+def shannon_etpy(trj, T1, T2):
     """Shannon entropy (or system entropy) for trajectories.
     
     Args:
-      num_beads : Number of beads. Here, we allow only 2 and 5.
       trj : Trajectories of multiple model for length. 
             So, its shape must be (number of model, 2, length) or (number of model, 5, length)
       T1 : Leftmost temperature
@@ -83,6 +82,8 @@ def shannon_etpy(num_beads, trj, T1, T2):
       Shannon entropy for each step of 'trj'. So, its shape is (number of model, length) or (number of model, length)
     """
     num_model = trj.shape[0]
+    num_beads = trj.shape[1]
+    assert (num_beads == 2) or (num_beads==5), "'number of beads' in 'trj' must be 2 or 5"
     length = trj.shape[-1]
     etpy_avg = np.zeros((num_model, length), dtype=np.float32)
 
@@ -94,11 +95,10 @@ def shannon_etpy(num_beads, trj, T1, T2):
     return etpy_avg
 
 
-def del_shannon_etpy(num_beads, trj, T1, T2):
+def del_shannon_etpy(trj, T1, T2):
     """Shannon entropy (or system entropy) difference for trajectories.
     
     Args:
-      num_beads : Number of beads. Here, we allow only 2 and 5.
       trj : Trajectories of multiple model for length. 
             So, its shape must be (number of model, 2, length) or (number of model, 5, length)
       T1 : Leftmost temperature
@@ -108,6 +108,8 @@ def del_shannon_etpy(num_beads, trj, T1, T2):
       Shannon entropy difference for each step of 'trj'. So, its shape is (number of model, length) or (number of model, length)
     """
     num_model = trj.shape[0]
+    num_beads = trj.shape[1]
+    assert (num_beads == 2) or (num_beads==5), "'number of beads' in 'trj' must be 2 or 5"
     length = trj.shape[-1]
     etpy_avg = np.zeros((num_model, length), dtype=np.float32)
 
@@ -120,11 +122,10 @@ def del_shannon_etpy(num_beads, trj, T1, T2):
     return etpy_avg
 
 
-def medium_etpy(num_beads, trj, T1, T2):
+def medium_etpy(trj, T1, T2):
     """Medium entropy for trajectories.
     
     Args:
-      num_beads : Number of beads. Here, we allow only 2 and 5.
       trj : Trajectories of multiple model for length. 
             So, its shape must be (number of model, 2, length) or (number of model, 5, length)
       T1 : Leftmost temperature
@@ -134,7 +135,8 @@ def medium_etpy(num_beads, trj, T1, T2):
       Medium entropy for each step of 'trj'. So, its shape is (number of model, length) or (number of model, length)
     """
     num_model = trj.shape[0]
-    
+    num_beads = trj.shape[1]
+    assert (num_beads == 2) or (num_beads==5), "'number of beads' in 'trj' must be 2 or 5"
     length = trj.shape[-1]
     
     etpy = np.zeros((num_model, length), dtype=np.float32)
@@ -168,13 +170,12 @@ def medium_etpy(num_beads, trj, T1, T2):
     return etpy
 
 
-def del_medium_etpy(num_beads, trj, T1, T2):
+def del_medium_etpy(trj, T1, T2):
     """Medium entropy (or system entropy) difference for trajectories.
     
     Args:
-      num_beads : Number of beads. Here, we allow only 2 and 5.
       trj : Trajectories of multiple model for length. 
-            So, its shape must be (number of model, 2, length) or (number of model, 5, length)
+            So, its shape must be (number of model, number of beads, length).
       T1 : Leftmost temperature
       T2 : Rightmost temperature
 
@@ -182,7 +183,8 @@ def del_medium_etpy(num_beads, trj, T1, T2):
       Medium entropy difference for each step of 'trj'. So, its shape is (number of model, length) or (number of model, length)
     """
     num_model = trj.shape[0]
-    
+    num_beads = trj.shape[1]
+    assert (num_beads == 2) or (num_beads==5), "'number of beads' in 'trj' must be 2 or 5"
     length = trj.shape[-1]
     etpy = np.zeros((num_model, length), dtype=np.float32)
 
@@ -226,11 +228,11 @@ def analytic_etpy(num_beads, T1, T2):
     Returns:
       Analytic entropy production rate for bead-spring model in steady state.
     """
+    assert (num_beads == 2) or (num_beads==5), "'num_beads' must be 2 or 5"
+
     k, e = 1, 1
     if num_beads == 2:
         return k*((T1-T2)**2)/(4*e*T1*T2)
     
     elif num_beads == 5:
         return k*(T1-T2)**2 * (111*T1**2 + 430*T1*T2 + 111*T2**2)/(495*T1*T2*(3*T1+T2)*(T1+3*T2)*e)
-
-    return -1
