@@ -117,7 +117,7 @@ def simulation(num_trjs, trj_len, num_beads, T1, T2, dt, seed=0):
 
         trj[:, :, it] = position
 
-    return trj
+    return trj.transpose(0, 2, 1)
 
 
 def p_ss(num_beads, x, T1, T2):
@@ -265,6 +265,7 @@ def del_shannon_etpy(trj, T1, T2):
         Shannon entropy difference for each step of 'trj'. 
         So, its shape is (number of model, trj_len) or (number of model, trj_len)
     """
+    trj = trj.transpose(0, 2, 1)
 
     num_trjs = trj.shape[0]
     num_beads = trj.shape[1]
@@ -296,6 +297,7 @@ def del_medium_etpy(trj, T1, T2):
         Medium entropy difference for each step of 'trj'. 
         So, its shape is (number of model, trj_len) or (number of model, trj_len)
     """
+    trj = trj.transpose(0, 2, 1)
 
     num_trjs = trj.shape[0]
     num_beads = trj.shape[1]
