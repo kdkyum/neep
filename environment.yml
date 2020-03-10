@@ -1,0 +1,15 @@
+name: neep
+channels:
+  - defaults
+dependencies:
+  - python=3.6
+  - pip:
+    - torch
+    - torchvision
+    - tqdm
+    - matplotlib
+    - pandas
+    - scipy
+    - seaborn
+    - jupyter
+    - ipykernel
