@@ -69,8 +69,21 @@ def sampling(num_beads, T1, T2, num_trjs=1000):
     return positions
 
 
-def simulation(num_beads, T1, T2, dt, trj_len, seed, num_trjs=1000):
+def simulation(num_trjs, trj_len, num_beads, T1, T2, dt, seed=0):
+    """Simulation of a bead-spring model
+    
+    Args:
+        num_beads : Number of beads. Here, we allow only 2 and 5.
+        T1 : Leftmost temperature
+        T2 : Rightmost temperature
+        dt : time step 
+        trj_len : length of trajectories
+        seed : seed of random generator
+        num_trjs : Number of trajectories you want. default = 1000.
 
+    Returns:
+        trajectories of a bead-spring model
+    """
     T = np.linspace(T1, T2, num_beads)  # Temperatures linearly varies.
     Drift = np.zeros((num_beads, num_beads))
     for i in range(num_beads):
