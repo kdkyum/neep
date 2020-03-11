@@ -6,6 +6,7 @@ dependencies:
   - pip:
     - torch
     - torchvision
+    - numpy==1.16.1
     - tqdm
     - matplotlib
     - pandas
