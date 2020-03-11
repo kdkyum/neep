@@ -1,4 +1,5 @@
 import random
+import torch
 from itertools import product
 
 import numpy as np
@@ -26,10 +27,12 @@ class CartesianSampler:
         >>>     print(batch, next_batch)
     """
 
-    def __init__(self, M, L, batch_size, train=True):
-        self.cartesian_set = [[i, t] for i, t in product(range(0, M), range(0, L - 1))]
-        self.size = len(self.cartesian_set)
+    def __init__(self, M, L, batch_size, device="cpu", train=True):
+        self.size = M * (L - 1)
+        self.M = M
+        self.L = L
         self.batch_size = batch_size
+        self.device = device
         self.training = train
         self.index = 0
 
@@ -45,19 +48,27 @@ class CartesianSampler:
 
     def __next__(self):
         if self.training:
-            batch = random.choices(self.cartesian_set, k=self.batch_size)
-            next_batch = list(map(lambda x: [x[0], x[1] + 1], batch))
-            batch = np.transpose(batch)
-            next_batch = np.transpose(next_batch)
-            return (batch[0], batch[1]), (next_batch[0], next_batch[1])
+            ens_idx = torch.randint(self.M, (self.batch_size,), device=self.device)
+            traj_idx = torch.randint(
+                0, (self.L - 1), (self.batch_size,), device=self.device
+            )
+            batch = (ens_idx, traj_idx)
+            next_batch = (ens_idx, traj_idx + 1)
+            return batch, next_batch
         else:
             prev_idx = self.index * self.batch_size
             next_idx = (self.index + 1) * self.batch_size
             if prev_idx >= self.size:
                 raise StopIteration
-            batch = self.cartesian_set[prev_idx:next_idx]
-            next_batch = list(map(lambda x: [x[0], x[1] + 1], batch))
+            elif next_idx >= self.size:
+                next_idx = self.size
+            ens_idx = torch.arange(prev_idx, next_idx, device=self.device) // (
+                self.L - 1
+            )
+            traj_idx = torch.arange(prev_idx, next_idx, device=self.device) % (
+                self.L - 1
+            )
             self.index += 1
-            batch = np.transpose(batch)
-            next_batch = np.transpose(next_batch)
-            return (batch[0], batch[1]), (next_batch[0], next_batch[1])
+            batch = (ens_idx, traj_idx)
+            next_batch = (ens_idx, traj_idx + 1)
+            return batch, next_batch
