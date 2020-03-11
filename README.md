@@ -6,7 +6,7 @@
 
 ## Introduction
 
-This repo is implementation of NEEP.
+This repo contains source code for the runs in [Learning entropy production via neural networks](https://arxiv.org/abs/2003.04166)
 
 ## Installation
 ```bash
