@@ -10,8 +10,10 @@ This repo is implementation of NEEP.
 
 ## Installation
 ```bash
-git clone https://github.com/kdkyum/neep && cd neep
-conda env create -f environment.yml -y && conda activate neep
+git clone https://github.com/kdkyum/neep
+cd neep
+conda env create -f environment.yml
+conda activate neep
 python -m ipykernel install --name neep
 ```
 
