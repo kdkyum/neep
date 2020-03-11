@@ -85,7 +85,6 @@ def simulation(num_trjs, trj_len, num_beads, T1, T2, dt, seed=0):
         trajectories of a bead-spring model
     """
     T = np.linspace(T1, T2, num_beads)  # Temperatures linearly varies.
-    print(T)
     Drift = np.zeros((num_beads, num_beads))
     for i in range(num_beads):
         if i > 0:
@@ -101,8 +100,6 @@ def simulation(num_trjs, trj_len, num_beads, T1, T2, dt, seed=0):
         rfc[i] = np.sqrt(2 * e * T[i])
 
     np.random.seed(seed)
-
-    print("MultiBead Simulation Starts with seed=", seed)
 
     trj = np.zeros((num_trjs, num_beads, trj_len))
     position = sampling(num_beads, T1, T2, num_trjs)
@@ -126,7 +123,7 @@ def p_ss(num_beads, x, T1, T2):
     Args:
         num_beads : Number of beads. Here, we allow only 2 and 5.
         x : states of beads for multiple models. 
-            So, its shape must be (number of model, number of beads)
+            So, its shape must be (number of trajectory, number of beads)
         T1 : Leftmost temperature
         T2 : Rightmost temperature
 
@@ -257,45 +254,13 @@ def del_shannon_etpy(trj, T1, T2):
     
     Args:
         trj : Trajectories of multiple model for trj_len.
-            So, its shape must be (number of model, trj_len, number of beads).
+            So, its shape must be (number of trajectory, trj_len, number of beads).
         T1 : Leftmost temperature
         T2 : Rightmost temperature
 
     Returns:
         Shannon entropy difference for each step of 'trj'. 
-        So, its shape is (number of model, trj_len) or (number of model, trj_len)
-    """
-    trj = trj.transpose(0, 2, 1)
-
-    num_trjs = trj.shape[0]
-    num_beads = trj.shape[1]
-    assert (num_beads == 2) or (
-        num_beads == 5
-    ), "'number of beads' in 'trj' must be 2 or 5"
-    trj_len = trj.shape[-1]
-    etpy_avg = np.zeros((num_trjs, trj_len), dtype=np.float32)
-
-    p0 = -np.log(p_ss(num_beads, trj[:, :, 0], T1, T2))
-    for it in range(trj_len):
-        pt = -np.log(p_ss(num_beads, trj[:, :, it], T1, T2))
-        etpy_avg[:, it] = pt - p0
-        p0 = pt
-
-    return etpy_avg[:, 1:]
-
-
-def del_medium_etpy(trj, T1, T2):
-    """Medium entropy (or system entropy) difference for trajectories.
-    
-    Args:
-        trj : Trajectories of multiple model for trj_len. 
-            So, its shape must be (number of model, trj_len, number of beads).
-        T1 : Leftmost temperature
-        T2 : Rightmost temperature
-
-    Returns:
-        Medium entropy difference for each step of 'trj'. 
-        So, its shape is (number of model, trj_len) or (number of model, trj_len)
+        So, its shape is (number of trajectory, trj_len) or (number of trajectory, trj_len)
     """
     trj = trj.transpose(0, 2, 1)
 
@@ -307,31 +272,58 @@ def del_medium_etpy(trj, T1, T2):
     trj_len = trj.shape[-1]
     etpy = np.zeros((num_trjs, trj_len), dtype=np.float32)
 
-    dQ = np.zeros((num_trjs, num_beads))
+    p0 = -np.log(p_ss(num_beads, trj[:, :, 0], T1, T2))
+    for it in range(trj_len):
+        pt = -np.log(p_ss(num_beads, trj[:, :, it], T1, T2))
+        etpy[:, it] = pt - p0
+        p0 = pt
 
-    Drift = np.zeros((num_trjs, num_beads, num_beads))
+    return etpy[:, 1:]
+
+
+def del_medium_etpy(trj, T1, T2):
+    """Medium entropy (or system entropy) difference for trajectories.
+    
+    Args:
+        trj : Trajectories of multiple model for trj_len. 
+            So, its shape must be (number of trajectory, trj_len, number of beads).
+        T1 : Leftmost temperature
+        T2 : Rightmost temperature
+
+    Returns:
+        Medium entropy difference for each step of 'trj'. 
+        So, its shape is (number of trajectory, trj_len) or (number of trajectory, trj_len)
+    """
+    # trj = trj.transpose(0, 2, 1)
+
+    num_trjs = trj.shape[0]
+    num_beads = trj.shape[-1]
+    assert (num_beads == 2) or (
+        num_beads == 5
+    ), "'number of beads' in 'trj' must be 2 or 5"
+    trj_len = trj.shape[1]
+    etpy = np.zeros((num_trjs, trj_len), dtype=np.float32)
+
+    Drift = np.zeros((num_beads, num_beads))
     T = np.linspace(T1, T2, num_beads)
 
-    for j in range(num_trjs):
-        for i in range(num_beads):
-            if i > 0:
-                Drift[j][i][i - 1] = k / e
-            if i < num_beads - 1:
-                Drift[j][i][i + 1] = k / e
-            Drift[j][i][i] = -2 * k / e
+    for i in range(num_beads):
+        if i > 0:
+            Drift[i][i - 1] = k / e
+        if i < num_beads - 1:
+            Drift[i][i + 1] = k / e
+        Drift[i][i] = -2 * k / e
 
-    x = trj[:, :, 0]
+    x = trj[:, 0, :]
     for it in range(trj_len):
-        dx = trj[:, :, it] - x
+        dx = trj[:, it, :] - x
 
-        Fx = np.zeros(x.shape)
-        for i in range(num_trjs):
-            Fx[i] = np.dot(Drift[i], (x + (dx / 2))[i])
+        Fx = np.dot((x + (dx / 2)), Drift)
 
         dQ = Fx * dx
         etpy[:, it] = np.sum(dQ / T, axis=1)
 
-        x = trj[:, :, it]
+        x = trj[:, it, :]
 
     return etpy[:, 1:]
 
