@@ -42,14 +42,22 @@ def simulation(num_trjs, trj_len, V, T=1, r=1, seed=0):
 
     Returns:
         trajectories of a discrete flashing ratchet model.
+        So, its shape is (num_trjs, trj_len)
     """
     P = transition_matrix(V, T, r)
     trajs = []
-    states = np.random.randint(0, 6, size=(num_trjs,), p=p_ss(V, T, r))
+    states = np.random.choice(6, size=(num_trjs,), p=p_ss(V, T, r))
     trajs.append(states)
-    for i in range(trj_len):
-        trajs.append(np.random.choice(6, p=P[states[i]]))
-    return np.array(trajs)
+
+    for _ in range(trj_len-1):
+        next_stat = []
+
+        for s in range(num_trjs):
+            next_stat.append(np.random.choice(6, p=P[states[s]]))
+        
+        trajs.append(next_stat)
+        states = next_stat
+    return np.array(trajs).T
 
 def ep_per_step(V, T=1, r=1):
     P = transition_matrix(V, T, r)
