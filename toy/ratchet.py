@@ -60,14 +60,12 @@ def simulation(num_trjs, trj_len, V, T=1, r=1, seed=0):
     states = np.random.choice(6, size=(num_trjs,), p=p_ss(V, T, r))
     trajs.append(states)
 
-    for _ in range(trj_len - 1):
-        next_stat = []
-
-        for s in range(num_trjs):
-            next_stat.append(np.random.choice(6, p=P[states[s]]))
-
-        trajs.append(next_stat)
-        states = next_stat
+    for i in range(trj_len - 1):
+        mc = np.random.uniform(0.0, 1.0, size=(num_trjs, 1))
+        intervals = np.cumsum(P[states], axis=1)
+        next_state = np.sum(intervals < mc, axis=1)
+        trajs.append(next_state)
+        states = next_state
     return np.array(trajs).T
 
 
