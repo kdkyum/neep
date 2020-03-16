@@ -2,7 +2,7 @@ import numpy as np
 
 
 def transition_matrix(V, T=1, r=1):
-    """Transition matrix of discrete flashing ratchet model
+    """Transition matrix of discrete flashing ratchet model.
     
     Args:
         V : potential value
@@ -70,6 +70,16 @@ def simulation(num_trjs, trj_len, V, T=1, r=1, seed=0):
 
 
 def ep_per_step(V, T=1, r=1):
+    """Analytic average entropy production per step
+    
+    Args:
+        V : potential value
+        T : Temperature of the heat bath (default: 1)
+        r : switching rate (default: 1)
+
+    Returns:
+        analytic average entropy production per step
+    """
     P = transition_matrix(V, T, r)
     stationary = p_ss(V, T, r)
     entropy_per_step = (
@@ -81,6 +91,33 @@ def ep_per_step(V, T=1, r=1):
         + (P[2][1] * V * stationary[2])
     )
     return entropy_per_step
+
+
+def analytic_etpy(trj, V, T=1, r=1):
+    """Analytic stochastic entropy production over a single trajectory.
+    
+    Args:
+        trj : a single trajectory
+        V : potential value
+        T : Temperature of the heat bath (default: 1)
+        r : switching rate (default: 1)
+
+    Returns:
+        analytic stochastic entropy production trajectory
+    """
+    etpy = []
+    tran = transition_matrix(V, T, r)
+    p = p_ss(V, T, r)
+
+    for it in range(len(trj) - 1):
+        temp = (
+            p[trj[it + 1]]
+            * tran[trj[it], trj[it + 1]]
+            / (p[trj[it]] * tran[trj[it + 1], trj[it]])
+        )
+        etpy.append(np.log(temp))
+
+    return np.array(etpy)
 
 
 def p_ss(V, T=1, r=1):
