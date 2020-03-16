@@ -1,5 +1,6 @@
 import numpy as np
 
+
 def transition_matrix(V, T=1, r=1):
     """Transition matrix of discrete flashing ratchet model
     
@@ -12,22 +13,32 @@ def transition_matrix(V, T=1, r=1):
         Probability at state s
     """
 
-    sum0 = np.exp(-V / (2*T)) + np.exp(-V / T) + r
-    sum1 = np.exp(V / (2*T)) + np.exp(-V / (2*T)) + r
-    sum2 = np.exp(V / T) + np.exp(V / (2*T)) + r
+    sum0 = np.exp(-V / (2 * T)) + np.exp(-V / T) + r
+    sum1 = np.exp(V / (2 * T)) + np.exp(-V / (2 * T)) + r
+    sum2 = np.exp(V / T) + np.exp(V / (2 * T)) + r
     sum3 = 2 + r
     sum4 = 2 + r
     sum5 = 2 + r
 
-    P = np.array([
-        [0, np.exp(-V / (2*T)) / sum0, np.exp(-V / T) / sum0, r / sum0, 0, 0],
-        [np.exp(V / (2*T)) / sum1, 0,  np.exp(-V / (2*T)) / sum1, 0, r / sum1, 0],
-        [np.exp(V / T) / sum2, np.exp(V / (2*T)) / sum2, 0, 0, 0, r / sum2],
-        [r/sum3, 0, 0, 0, 1/sum3, 1/sum3],
-        [0, r/sum4, 0, 1/sum4, 0, 1/sum4],
-        [0, 0, r/sum5, 1/sum5, 1/sum5, 0]
-    ])
+    P = np.array(
+        [
+            [0, np.exp(-V / (2 * T)) / sum0, np.exp(-V / T) / sum0, r / sum0, 0, 0],
+            [
+                np.exp(V / (2 * T)) / sum1,
+                0,
+                np.exp(-V / (2 * T)) / sum1,
+                0,
+                r / sum1,
+                0,
+            ],
+            [np.exp(V / T) / sum2, np.exp(V / (2 * T)) / sum2, 0, 0, 0, r / sum2],
+            [r / sum3, 0, 0, 0, 1 / sum3, 1 / sum3],
+            [0, r / sum4, 0, 1 / sum4, 0, 1 / sum4],
+            [0, 0, r / sum5, 1 / sum5, 1 / sum5, 0],
+        ]
+    )
     return P
+
 
 def simulation(num_trjs, trj_len, V, T=1, r=1, seed=0):
     """Simulation of a discrete flashing ratchet.
@@ -49,26 +60,30 @@ def simulation(num_trjs, trj_len, V, T=1, r=1, seed=0):
     states = np.random.choice(6, size=(num_trjs,), p=p_ss(V, T, r))
     trajs.append(states)
 
-    for _ in range(trj_len-1):
+    for _ in range(trj_len - 1):
         next_stat = []
 
         for s in range(num_trjs):
             next_stat.append(np.random.choice(6, p=P[states[s]]))
-        
+
         trajs.append(next_stat)
         states = next_stat
     return np.array(trajs).T
 
+
 def ep_per_step(V, T=1, r=1):
     P = transition_matrix(V, T, r)
     stationary = p_ss(V, T, r)
-    entropy_per_step = (- P[0][1] * V * stationary[0]) + \
-            (- P[0][2] * 2 * V * stationary[0] ) + \
-            (P[1][0] * V * stationary[1]) + \
-            (- P[1][2] * V * stationary[1]) + \
-            (P[2][0] * 2 * V * stationary[2]) + \
-            (P[2][1] * V * stationary[2])
+    entropy_per_step = (
+        (-P[0][1] * V * stationary[0])
+        + (-P[0][2] * 2 * V * stationary[0])
+        + (P[1][0] * V * stationary[1])
+        + (-P[1][2] * V * stationary[1])
+        + (P[2][0] * 2 * V * stationary[2])
+        + (P[2][1] * V * stationary[2])
+    )
     return entropy_per_step
+
 
 def p_ss(V, T=1, r=1):
     """Array of probability density in steady state.
@@ -83,39 +98,121 @@ def p_ss(V, T=1, r=1):
     """
     steady = np.array(
         [
-            ((1 + np.exp(1)**(V/(2*T)) + np.exp(1)**(V/T)*r)*
-          (3*np.exp(1)**(V/(2*T))*r**2 + r*(3 + r) + np.exp(1)**((2*V)/T)*(3 + r)**2 + 
-            3*np.exp(1)**((3*V)/(2*T))*(3 + 4*r + r**2) + np.exp(1)**(V/T)*(9 + 15*r + 4*r**2)))/
-        ((2 + r)*(3 + 4*r + r**2 + np.exp(1)**((3*V)/T)*(3 + r) + 
-            np.exp(1)**((5*V)/(2*T))*(3 + 4*r) + np.exp(1)**((2*V)/T)*(6 + 8*r + r**2) + 
-            np.exp(1)**((3*V)/(2*T))*(3 + r + 3*r**2) + np.exp(1)**(V/(2*T))*(3 + 7*r + 3*r**2) + 
-            np.exp(1)**(V/T)*(6 + 11*r + 4*r**2))),
-       ((1 + np.exp(1)**(V/T) + np.exp(1)**(V/(2*T))*r)*
-          (r*(3 + r) + np.exp(1)**((2*V)/T)*r*(3 + r) + 3*np.exp(1)**(V/(2*T))*(3 + 4*r + r**2) + 
-            3*np.exp(1)**((3*V)/(2*T))*(3 + 4*r + r**2) + np.exp(1)**(V/T)*(9 + 6*r + 4*r**2)))/
-        ((2 + r)*(3 + 4*r + r**2 + np.exp(1)**((3*V)/T)*(3 + r) + 
-            np.exp(1)**((5*V)/(2*T))*(3 + 4*r) + np.exp(1)**((2*V)/T)*(6 + 8*r + r**2) + 
-            np.exp(1)**((3*V)/(2*T))*(3 + r + 3*r**2) + np.exp(1)**(V/(2*T))*(3 + 7*r + 3*r**2) + 
-            np.exp(1)**(V/T)*(6 + 11*r + 4*r**2))),
-       ((np.exp(1)**(V/(2*T)) + np.exp(1)**(V/T) + r)*
-          (3*np.exp(1)**((3*V)/(2*T))*r**2 + np.exp(1)**((2*V)/T)*r*(3 + r) + (3 + r)**2 + 
-            3*np.exp(1)**(V/(2*T))*(3 + 4*r + r**2) + np.exp(1)**(V/T)*(9 + 15*r + 4*r**2)))/
-        ((2 + r)*(3 + 4*r + r**2 + np.exp(1)**((3*V)/T)*(3 + r) + 
-            np.exp(1)**((5*V)/(2*T))*(3 + 4*r) + np.exp(1)**((2*V)/T)*(6 + 8*r + r**2) + 
-            np.exp(1)**((3*V)/(2*T))*(3 + r + 3*r**2) + np.exp(1)**(V/(2*T))*(3 + 7*r + 3*r**2) + 
-            np.exp(1)**(V/T)*(6 + 11*r + 4*r**2))),
-       (3 + r + np.exp(1)**(V/(2*T))*(3 + 4*r) + np.exp(1)**((3*V)/T)*(3 + 4*r + r**2) + 
-          np.exp(1)**(V/T)*(6 + 8*r + r**2) + np.exp(1)**((3*V)/(2*T))*(3 + r + 3*r**2) + 
-          np.exp(1)**((5*V)/(2*T))*(3 + 7*r + 3*r**2) + np.exp(1)**((2*V)/T)*(6 + 11*r + 4*r**2))/
-        (3 + 4*r + r**2 + np.exp(1)**((3*V)/T)*(3 + r) + np.exp(1)**((5*V)/(2*T))*(3 + 4*r) + 
-          np.exp(1)**((2*V)/T)*(6 + 8*r + r**2) + np.exp(1)**((3*V)/(2*T))*(3 + r + 3*r**2) + 
-          np.exp(1)**(V/(2*T))*(3 + 7*r + 3*r**2) + np.exp(1)**(V/T)*(6 + 11*r + 4*r**2)),
-       (3 + r + np.exp(1)**((3*V)/T)*(3 + r) + np.exp(1)**(V/(2*T))*(3 + 4*r + r**2) + 
-          np.exp(1)**((5*V)/(2*T))*(3 + 4*r + r**2) + np.exp(1)**(V/T)*(6 + 11*r + 3*r**2) + 
-          np.exp(1)**((2*V)/T)*(6 + 11*r + 3*r**2) + np.exp(1)**((3*V)/(2*T))*(3 + 4*r + 4*r**2))/
-        (3 + 4*r + r**2 + np.exp(1)**((3*V)/T)*(3 + r) + np.exp(1)**((5*V)/(2*T))*(3 + 4*r) + 
-          np.exp(1)**((2*V)/T)*(6 + 8*r + r**2) + np.exp(1)**((3*V)/(2*T))*(3 + r + 3*r**2) + 
-          np.exp(1)**(V/(2*T))*(3 + 7*r + 3*r**2) + np.exp(1)**(V/T)*(6 + 11*r + 4*r**2)), 1
+            (
+                (1 + np.exp(1) ** (V / (2 * T)) + np.exp(1) ** (V / T) * r)
+                * (
+                    3 * np.exp(1) ** (V / (2 * T)) * r ** 2
+                    + r * (3 + r)
+                    + np.exp(1) ** ((2 * V) / T) * (3 + r) ** 2
+                    + 3 * np.exp(1) ** ((3 * V) / (2 * T)) * (3 + 4 * r + r ** 2)
+                    + np.exp(1) ** (V / T) * (9 + 15 * r + 4 * r ** 2)
+                )
+            )
+            / (
+                (2 + r)
+                * (
+                    3
+                    + 4 * r
+                    + r ** 2
+                    + np.exp(1) ** ((3 * V) / T) * (3 + r)
+                    + np.exp(1) ** ((5 * V) / (2 * T)) * (3 + 4 * r)
+                    + np.exp(1) ** ((2 * V) / T) * (6 + 8 * r + r ** 2)
+                    + np.exp(1) ** ((3 * V) / (2 * T)) * (3 + r + 3 * r ** 2)
+                    + np.exp(1) ** (V / (2 * T)) * (3 + 7 * r + 3 * r ** 2)
+                    + np.exp(1) ** (V / T) * (6 + 11 * r + 4 * r ** 2)
+                )
+            ),
+            (
+                (1 + np.exp(1) ** (V / T) + np.exp(1) ** (V / (2 * T)) * r)
+                * (
+                    r * (3 + r)
+                    + np.exp(1) ** ((2 * V) / T) * r * (3 + r)
+                    + 3 * np.exp(1) ** (V / (2 * T)) * (3 + 4 * r + r ** 2)
+                    + 3 * np.exp(1) ** ((3 * V) / (2 * T)) * (3 + 4 * r + r ** 2)
+                    + np.exp(1) ** (V / T) * (9 + 6 * r + 4 * r ** 2)
+                )
+            )
+            / (
+                (2 + r)
+                * (
+                    3
+                    + 4 * r
+                    + r ** 2
+                    + np.exp(1) ** ((3 * V) / T) * (3 + r)
+                    + np.exp(1) ** ((5 * V) / (2 * T)) * (3 + 4 * r)
+                    + np.exp(1) ** ((2 * V) / T) * (6 + 8 * r + r ** 2)
+                    + np.exp(1) ** ((3 * V) / (2 * T)) * (3 + r + 3 * r ** 2)
+                    + np.exp(1) ** (V / (2 * T)) * (3 + 7 * r + 3 * r ** 2)
+                    + np.exp(1) ** (V / T) * (6 + 11 * r + 4 * r ** 2)
+                )
+            ),
+            (
+                (np.exp(1) ** (V / (2 * T)) + np.exp(1) ** (V / T) + r)
+                * (
+                    3 * np.exp(1) ** ((3 * V) / (2 * T)) * r ** 2
+                    + np.exp(1) ** ((2 * V) / T) * r * (3 + r)
+                    + (3 + r) ** 2
+                    + 3 * np.exp(1) ** (V / (2 * T)) * (3 + 4 * r + r ** 2)
+                    + np.exp(1) ** (V / T) * (9 + 15 * r + 4 * r ** 2)
+                )
+            )
+            / (
+                (2 + r)
+                * (
+                    3
+                    + 4 * r
+                    + r ** 2
+                    + np.exp(1) ** ((3 * V) / T) * (3 + r)
+                    + np.exp(1) ** ((5 * V) / (2 * T)) * (3 + 4 * r)
+                    + np.exp(1) ** ((2 * V) / T) * (6 + 8 * r + r ** 2)
+                    + np.exp(1) ** ((3 * V) / (2 * T)) * (3 + r + 3 * r ** 2)
+                    + np.exp(1) ** (V / (2 * T)) * (3 + 7 * r + 3 * r ** 2)
+                    + np.exp(1) ** (V / T) * (6 + 11 * r + 4 * r ** 2)
+                )
+            ),
+            (
+                3
+                + r
+                + np.exp(1) ** (V / (2 * T)) * (3 + 4 * r)
+                + np.exp(1) ** ((3 * V) / T) * (3 + 4 * r + r ** 2)
+                + np.exp(1) ** (V / T) * (6 + 8 * r + r ** 2)
+                + np.exp(1) ** ((3 * V) / (2 * T)) * (3 + r + 3 * r ** 2)
+                + np.exp(1) ** ((5 * V) / (2 * T)) * (3 + 7 * r + 3 * r ** 2)
+                + np.exp(1) ** ((2 * V) / T) * (6 + 11 * r + 4 * r ** 2)
+            )
+            / (
+                3
+                + 4 * r
+                + r ** 2
+                + np.exp(1) ** ((3 * V) / T) * (3 + r)
+                + np.exp(1) ** ((5 * V) / (2 * T)) * (3 + 4 * r)
+                + np.exp(1) ** ((2 * V) / T) * (6 + 8 * r + r ** 2)
+                + np.exp(1) ** ((3 * V) / (2 * T)) * (3 + r + 3 * r ** 2)
+                + np.exp(1) ** (V / (2 * T)) * (3 + 7 * r + 3 * r ** 2)
+                + np.exp(1) ** (V / T) * (6 + 11 * r + 4 * r ** 2)
+            ),
+            (
+                3
+                + r
+                + np.exp(1) ** ((3 * V) / T) * (3 + r)
+                + np.exp(1) ** (V / (2 * T)) * (3 + 4 * r + r ** 2)
+                + np.exp(1) ** ((5 * V) / (2 * T)) * (3 + 4 * r + r ** 2)
+                + np.exp(1) ** (V / T) * (6 + 11 * r + 3 * r ** 2)
+                + np.exp(1) ** ((2 * V) / T) * (6 + 11 * r + 3 * r ** 2)
+                + np.exp(1) ** ((3 * V) / (2 * T)) * (3 + 4 * r + 4 * r ** 2)
+            )
+            / (
+                3
+                + 4 * r
+                + r ** 2
+                + np.exp(1) ** ((3 * V) / T) * (3 + r)
+                + np.exp(1) ** ((5 * V) / (2 * T)) * (3 + 4 * r)
+                + np.exp(1) ** ((2 * V) / T) * (6 + 8 * r + r ** 2)
+                + np.exp(1) ** ((3 * V) / (2 * T)) * (3 + r + 3 * r ** 2)
+                + np.exp(1) ** (V / (2 * T)) * (3 + 7 * r + 3 * r ** 2)
+                + np.exp(1) ** (V / T) * (6 + 11 * r + 4 * r ** 2)
+            ),
+            1,
         ]
     )
     steady = steady / steady.sum()
