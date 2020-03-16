@@ -27,6 +27,9 @@ jupyter notebook
 See our notebook file at [`notebooks/bead-spring.ipynb`](notebooks/bead-spring.ipynb)
 
 ### Discrete flashing ratchet
+See our notebook file at [`notebooks/ratchet.ipynb`](notebooks/ratchet.ipynb)
+
+### RNEEP, Non-Markovian process
 * [ ] To be soon
 
 ## Author
