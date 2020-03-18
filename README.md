@@ -23,14 +23,15 @@ python -m ipykernel install --name neep
 jupyter notebook
 ```
 
+See the following notebooks for the runs in the paper.
 ### Bead-spring model
-See our notebook file at [`notebooks/bead-spring.ipynb`](notebooks/bead-spring.ipynb)
+* [`notebooks/bead-spring.ipynb`](notebooks/bead-spring.ipynb)
 
 ### Discrete flashing ratchet
-See our notebook file at [`notebooks/ratchet.ipynb`](notebooks/ratchet.ipynb)
+* [`notebooks/ratchet.ipynb`](notebooks/ratchet.ipynb)
 
-### RNEEP, Non-Markovian process
-* [ ] To be soon
+### RNEEP for Non-Markovian process
+* [`notebooks/partial-ratchet-RNEEP.ipynb`](notebooks/partial-ratchet-RNEEP.ipynb)
 
 ## Author
 Dong-Kyum Kim, Youngkyoung Bae, Sangyun Lee and Hawoong Jeong
