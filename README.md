@@ -1,5 +1,6 @@
 # NEEP: Neural Estimator for Entropy Production
 
+[![Paper](http://img.shields.io/badge/paper-arxiv.2003.04166-B31B1B.svg)](https://arxiv.org/abs/2003.04166)
 [![LICENSE](https://img.shields.io/github/license/kdkyum/neep.svg)](https://github.com/kdkyum/neep/blob/master/LICENSE)
 ![GitHub issues](https://img.shields.io/github/issues/kdkyum/neep.svg)
 [![GitHub stars](https://img.shields.io/github/stars/kdkyum/neep.svg)](https://github.com/kdkyum/neep/stargazers)
