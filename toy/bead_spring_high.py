@@ -1,5 +1,9 @@
-import numpy as np
+import os.path as osp
 import pickle
+
+import numpy as np
+
+CURRENT_DIR = osp.abspath(osp.dirname(__file__))
 
 # Spring and Stokes friction coefficient
 k, e = 1, 1
@@ -20,7 +24,7 @@ def sampling(num_beads, num_trjs):
     Returns:
         Sampled states from the probability density in steady state. 
     """
-    with open("covariance.pkl", "rb") as f:
+    with open(osp.join(CURRENT_DIR, "covariance.pkl"), "rb") as f:
         cov_dict = pickle.load(f)
     
     allow_num_beads = [8, 16, 32, 64, 128]
