@@ -102,7 +102,7 @@ class CartesianSeqSampler(CartesianSampler):
             M, L, batch_size, device=device, train=train
         )
         self.size = M * (L - n + 1)
-        self.dropL = torch.arange(0, L - n + 1, n - 1)[-1].item()
+        self.dropL = torch.arange(0, L, n - 1)[-1].item()
         self.test_size = self.dropL * M
         self.seq_length = n
         self.trj_idx = torch.ones(
