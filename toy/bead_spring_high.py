@@ -193,7 +193,7 @@ def p_ss(num_beads, x):
 
     cov = cov_dict[num_beads]
 
-    return np.exp(-np.sum(np.dot(x, np.linalg.inv(cov))*x, axis=2)/2)
+    return torch.exp(-np.sum(np.dot(x, np.linalg.inv(cov))*x, axis=2)/2)
 
 
 def cov(num_beads):
@@ -215,8 +215,8 @@ def del_shannon_etpy(trj):
     allow_num_beads = [16, 32, 64, 128]
     assert num_beads in allow_num_beads, "'num_beads' must be 8, 16, 32, 64, or 128"
 
-    etpy_prev = -np.log(p_ss(num_beads, trj[:, :-1, :]))
-    etpy_next = -np.log(p_ss(num_beads, trj[:, 1:, :]))
+    etpy_prev = -torch.log(p_ss(num_beads, trj[:, :-1, :]))
+    etpy_next = -torch.log(p_ss(num_beads, trj[:, 1:, :]))
 
     return (etpy_next - etpy_prev).astype(np.float32)
 
@@ -236,8 +236,8 @@ def del_medium_etpy(trj):
     allow_num_beads = [16, 32, 64, 128]
     assert num_beads in allow_num_beads, "'num_beads' must be 8, 16, 32, 64, or 128"
 
-    Drift = np.zeros((num_beads, num_beads))
-    T = np.linspace(T1[num_beads], T2, num_beads)
+    Drift = torch.zeros(num_beads, num_beads).to(trj.device)
+    T = torch.linspace(T1[num_beads], T2, num_beads).to(trj.device)
 
     for i in range(num_beads):
         if i > 0:
@@ -250,10 +250,10 @@ def del_medium_etpy(trj):
     x_next = trj[:, 1:, :]
     dx = x_next - x_prev
 
-    Fx = np.dot((x_next + x_prev)/2, Drift)
+    Fx = ((x_next + x_prev)/2) @ Drift
 
     dQ = Fx * dx
-    etpy = np.sum(dQ / T, axis=2)
+    etpy = torch.sum(dQ / T, dim=2)
 
-    return etpy.astype(np.float32)
+    return etpy
 
