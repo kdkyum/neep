@@ -99,27 +99,6 @@ def simulation(num_trjs, trj_len, num_beads, dt, device='cpu', seed=0):
     return trj
 
 
-def p_ss(num_beads, x):
-    """Probability density function in steady state.
-    
-    Args:
-        num_beads : Number of beads. Here, we allow only 2 and 5.
-        x : states of beads for multiple models. 
-            So, its shape must be (number of trajectory, trj_len, number of beads)
-        T1 : Leftmost temperature
-        T2 : Rightmost temperature
-
-    Returns:
-        Probability at x.
-    """
-    allow_num_beads = [16, 32, 64, 128]
-    assert num_beads in allow_num_beads, "'num_beads' must be 8, 16, 32, 64, or 128"
-
-    cov = cov_dict[num_beads]
-    cov = torch.from_numpy(cov).float()
-    return torch.exp(-torch.sum(x @ torch.inverse(cov)* x, axis=2)/2)
-
-
 def del_shannon_etpy(trj):
     """Shannon entropy (or system entropy) difference for trajectories.
     
@@ -134,11 +113,11 @@ def del_shannon_etpy(trj):
     num_beads = trj.shape[-1]
     allow_num_beads = [16, 32, 64, 128]
     assert num_beads in allow_num_beads, "'num_beads' must be 8, 16, 32, 64, or 128"
+    cov = cov_dict[num_beads]
+    cov = torch.from_numpy(cov).float()
+    etpy = torch.sum(trj @ torch.inverse(cov)* trj, axis=2)/2
 
-    etpy_prev = -torch.log(p_ss(num_beads, trj[:, :-1, :]))
-    etpy_next = -torch.log(p_ss(num_beads, trj[:, 1:, :]))
-
-    return etpy_next - etpy_prev
+    return etpy[:, 1:] - etpy[:, :-1]
 
 
 def del_medium_etpy(trj):
@@ -176,4 +155,3 @@ def del_medium_etpy(trj):
     etpy = torch.sum(dQ / T, dim=2)
 
     return etpy
-
