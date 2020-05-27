@@ -11,11 +11,14 @@ CURRENT_DIR = osp.abspath(osp.dirname(__file__))
 k, e = 1, 1
 
 # The leftmost (rightmost) temperature T1 (T2)
-T1 = {16: 0.20768, 32: 0.10358, 64: 0.05171, 128: 0.02583}
+T1 = {8 : 0.416997, 16: 0.20768, 32: 0.10358, 48: 0.06899, 64: 0.05171, 80: 0.04136, 128: 0.02583}
 T2 = 10
 
 with open(osp.join(CURRENT_DIR, "covariance.pkl"), "rb") as f:
     cov_dict = pickle.load(f)
+
+allow_num_beads = cov_dict.keys()
+print(allow_num_beads)
 
 def sampling(num_beads, num_trjs):
     """Sampling the states of beads in steady state.
@@ -29,21 +32,9 @@ def sampling(num_beads, num_trjs):
     Returns:
         Sampled states from the probability density in steady state. 
     """
-
-    allow_num_beads = [16, 32, 64, 128]
     assert num_beads in allow_num_beads, "'num_beads' must be 8, 16, 32, 64, or 128"
 
-    if num_beads == 16:
-        cov = cov_dict[16]
-
-    elif num_beads == 32:
-        cov = cov_dict[32]
-
-    elif num_beads == 64:
-        cov = cov_dict[64]
-
-    elif num_beads == 128:
-        cov = cov_dict[128]
+    cov = cov_dict[num_beads]
 
     N = MultivariateNormal(torch.zeros(num_beads), torch.from_numpy(cov).float())
     positions = N.sample((num_trjs,))
@@ -111,7 +102,6 @@ def del_shannon_etpy(trj):
         So, its shape is (number of trajectory, trj_len)
     """
     num_beads = trj.shape[-1]
-    allow_num_beads = [16, 32, 64, 128]
     assert num_beads in allow_num_beads, "'num_beads' must be 8, 16, 32, 64, or 128"
     cov = cov_dict[num_beads]
     cov = torch.from_numpy(cov).float()
@@ -132,7 +122,6 @@ def del_medium_etpy(trj):
         So, its shape is (number of trajectory, trj_len) or (number of trajectory, trj_len)
     """
     num_beads = trj.shape[-1]
-    allow_num_beads = [16, 32, 64, 128]
     assert num_beads in allow_num_beads, "'num_beads' must be 8, 16, 32, 64, or 128"
 
     Drift = torch.zeros(num_beads, num_beads).to(trj.device)
