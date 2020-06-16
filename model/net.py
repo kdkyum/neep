@@ -41,7 +41,7 @@ class EmbeddingNEEP(nn.Module):
         super(EmbeddingNEEP, self).__init__()
         self.encoder = nn.Embedding(opt.n_token, opt.n_hidden)
         self.h = nn.Sequential()
-        for i in range(opt.n_layer - 1):
+        for i in range(opt.n_layer):
             self.h.add_module(
                 "fc%d" % (i + 1), nn.Linear(2 * opt.n_hidden, 2 * opt.n_hidden)
             )
@@ -59,8 +59,8 @@ class EmbeddingNEEP(nn.Module):
 class RNEEP(nn.Module):
     def __init__(self, opt):
         super(RNEEP, self).__init__()
-        self.encoder = nn.Embedding(opt.n_token, opt.n_input)
-        self.rnn = nn.GRU(opt.n_input, opt.n_hidden, opt.n_layer)
+        self.encoder = nn.Embedding(opt.n_token, opt.n_hidden)
+        self.rnn = nn.GRU(opt.n_hidden, opt.n_hidden, opt.n_layer)
         self.fc = nn.Linear(opt.n_hidden, 1)
 
         self.nhid = opt.n_hidden
