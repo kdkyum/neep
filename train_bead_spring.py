@@ -66,8 +66,8 @@ def main(opt):
     model = model.to(opt.device)
     optim = torch.optim.Adam(model.parameters(), opt.lr, weight_decay=opt.wd)
 
-    trajs_t = torch.from_numpy(trajs).to(opt.device).float()
-    test_trajs_t = torch.from_numpy(test_trajs).to(opt.device).float()
+    trajs_t = trajs.to(opt.device).float()
+    test_trajs_t = test_trajs.to(opt.device).float()
 
     train_sampler = CartesianSampler(opt.n_trj, opt.n_step, opt.batch_size)
     test_sampler = CartesianSampler(opt.n_trj, opt.n_step, opt.test_batch_size, train=False)
