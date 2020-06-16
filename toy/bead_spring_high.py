@@ -18,7 +18,6 @@ with open(osp.join(CURRENT_DIR, "covariance.pkl"), "rb") as f:
     cov_dict = pickle.load(f)
 
 allow_num_beads = cov_dict.keys()
-print(allow_num_beads)
 
 def sampling(num_beads, num_trjs):
     """Sampling the states of beads in steady state.
@@ -57,6 +56,8 @@ def simulation(num_trjs, trj_len, num_beads, dt, device='cpu', seed=0):
     Returns:
         trajectories of a bead-spring 2d-lattice model
     """
+    torch.manual_seed(seed)
+
     T = torch.linspace(T1[num_beads], T2, num_beads).to(device)
     dt2 = torch.sqrt(torch.tensor(dt).float())
     
@@ -75,7 +76,6 @@ def simulation(num_trjs, trj_len, num_beads, dt, device='cpu', seed=0):
     for i in range(num_beads):
         rfc[i] = torch.sqrt(2 * e * T[i])
 
-    torch.manual_seed(seed)
             
     for it in range(trj_len):
         RanForce = torch.randn(num_trjs, num_beads, device=device)
@@ -144,3 +144,12 @@ def del_medium_etpy(trj):
     etpy = torch.sum(dQ / T, dim=2)
 
     return etpy
+
+def tot_entpy(trj):
+    M = trj.shape[0]
+    tmp = []
+    with torch.no_grad():
+        for m in range(M):
+            ent = del_medium_etpy(trj[m:m+1]) + del_shannon_etpy(trj[m:m+1])
+            tmp.append(ent)
+    return torch.cat(tmp, dim=0)

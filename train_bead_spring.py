@@ -6,7 +6,6 @@ import random
 import numpy as np
 import pandas as pd
 import torch
-import torch.nn as nn
 from tqdm import tqdm
 
 from misc.sampler import CartesianSampler
@@ -46,7 +45,7 @@ def validate(opt, model, trajs, sampler):
             loss += (-ent_production + torch.exp(-ent_production)).sum().cpu().item()
     loss = loss / sampler.size
     ret = np.concatenate(ret)
-    ret = ret.reshape(trajs.shape[0], trajs.shape[1] - 1)
+    ret = ret.reshape(trajs.shape[0], -1)
     return ret, loss
 
 
@@ -54,7 +53,7 @@ def main(opt):
     trajs = simulation(opt.n_trj, opt.n_step, opt.n_bead, 
         opt.Tc, opt.Th, opt.time_step, seed=0)
     test_trajs = simulation(opt.n_trj, opt.n_step, opt.n_bead, 
-        opt.Tc, opt.Th, opt.time_step, seed=1)
+        opt.Tc, opt.Th, opt.time_step, seed=3)
 
     if opt.normalize:
         mean, std = trajs.mean(axis=(0, 1)), trajs.std(axis=(0, 1))
@@ -81,7 +80,7 @@ def main(opt):
 
     for i in tqdm(range(1, opt.n_iter + 1)):
         if i % opt.record_freq == 0 or i == 1:
-            preds, train_loss = validate(opt, model, trajs_t, train_sampler)
+            preds, train_loss = validate(opt, model, trajs_t, test_sampler)
             train_log = logging(i, train_loss, opt.time_step, preds)
 
             preds, test_loss = validate(opt, model, test_trajs_t, test_sampler)
@@ -112,6 +111,7 @@ def main(opt):
             train_sampler.train()
 
         train(opt, model, optim, trajs_t, train_sampler)
+
 
     train_df = pd.DataFrame(ret_train)
     test_df = pd.DataFrame(ret_test)
@@ -188,9 +188,9 @@ if __name__ == "__main__":
     parser.add_argument(
         "--test-batch-size",
         type=int,
-        default=100000,
+        default=10000,
         metavar="N",
-        help="input batch size for testing (default: 100000)",
+        help="input batch size for testing (default: 10000)",
     )
     parser.add_argument(
         "--lr",
@@ -225,14 +225,15 @@ if __name__ == "__main__":
         type=int,
         default=2,
         metavar="N",
+        choices=[2, 5],
         help="number of input neuron = number of beads (default: 2)",
     )
     parser.add_argument(
         "--n-hidden",
         type=int,
-        default=512,
+        default=256,
         metavar="N",
-        help="number of hidden neuron (default: 512)",
+        help="number of hidden neuron (default: 256)",
     )
     parser.add_argument(
         "--n-layer",
