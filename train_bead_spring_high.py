@@ -56,7 +56,7 @@ def main(opt):
         opt.time_step, seed=3)
 
     mean, std = trajs.mean(axis=(0, 1)).to(opt.device), trajs.std(axis=(0, 1)).to(opt.device)
-    transform = lambda x: (x - mean)/std
+    transform = lambda x: (x - mean)/std if opt.normalize else lambda x: x
 
     opt.n_input = opt.n_bead
     torch.manual_seed(opt.seed)
