@@ -62,6 +62,9 @@ def main(opt):
         test_trajs = (test_trajs - mean) / std
 
     opt.n_input = opt.n_bead
+    torch.manual_seed(opt.seed)
+    random.seed(opt.seed)
+
     model = NEEP(opt)
     model = model.to(opt.device)
     optim = torch.optim.Adam(model.parameters(), opt.lr, weight_decay=opt.wd)
@@ -257,8 +260,6 @@ if __name__ == "__main__":
 
     opt = parser.parse_args()
     use_cuda = not opt.no_cuda and torch.cuda.is_available()
-    torch.manual_seed(opt.seed)
-    random.seed(opt.seed)
     opt.device = torch.device("cuda" if use_cuda else "cpu")
 
     main(opt)
