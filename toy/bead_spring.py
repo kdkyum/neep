@@ -1,4 +1,6 @@
+import torch
 import numpy as np
+from torch.distributions.multivariate_normal import MultivariateNormal
 
 # Spring and Stokes friction coefficient
 k, e = 1, 1
@@ -23,7 +25,8 @@ def sampling(num_beads, T1, T2, num_trjs):
             [(7 * T1 + T2) / (12.0 * k), (T1 + T2) / (6.0 * k)],
             [(T1 + T2) / (6.0 * k), (T1 + 7 * T2) / (12.0 * k)],
         ]
-        positions = np.random.multivariate_normal(np.zeros((2,)), cov, num_trjs)
+        N = MultivariateNormal(torch.zeros(2), torch.tensor(cov))
+        positions = N.sample((num_trjs,))
 
     elif num_beads == 5:
         cov = [
@@ -64,28 +67,35 @@ def sampling(num_beads, T1, T2, num_trjs):
             ],
         ]
 
-        positions = np.random.multivariate_normal(np.zeros((5,)), cov, num_trjs)
+        N = MultivariateNormal(torch.zeros(5), torch.tensor(cov))
+        positions = N.sample((num_trjs,))
 
     return positions
 
 
-def simulation(num_trjs, trj_len, num_beads, T1, T2, dt, seed=0):
-    """Simulation of a bead-spring model
+def simulation(num_trjs, trj_len, num_beads, T1, T2, dt, device='cpu', seed=0):
+    """Simulation of a bead-spring 2d-lattice model
     
     Args:
-        num_beads : Number of beads. Here, we allow only 2 and 5.
-        T1 : Leftmost temperature
-        T2 : Rightmost temperature
+        num_beads : Number of beads for each row
+        T1 : LeftUp-most temperature
+        T2 : RighDown-tmost temperature
         dt : time step 
         trj_len : length of trajectories
         seed : seed of random generator
         num_trjs : Number of trajectories you want. default = 1000.
 
     Returns:
-        trajectories of a bead-spring model
+        trajectories of a bead-spring 2d-lattice model
     """
-    T = np.linspace(T1, T2, num_beads)  # Temperatures linearly varies.
-    Drift = np.zeros((num_beads, num_beads))
+    T = torch.linspace(T1, T2, num_beads).to(device)
+    dt = torch.tensor(dt).to(device)
+    dt2 = torch.sqrt(dt).to(device)
+    
+    trj = torch.zeros(num_trjs, trj_len, num_beads).to(device)
+    Drift = torch.zeros(num_beads, num_beads).to(device)
+    position = sampling(num_beads, T1, T2, num_trjs).to(device)
+    
     for i in range(num_beads):
         if i > 0:
             Drift[i][i - 1] = k / e
@@ -93,28 +103,23 @@ def simulation(num_trjs, trj_len, num_beads, T1, T2, dt, seed=0):
             Drift[i][i + 1] = k / e
         Drift[i][i] = -2 * k / e
 
-    dt2 = np.sqrt(dt)
-
-    rfc = np.zeros((num_beads,))
+    rfc = torch.zeros(num_beads).to(device)
     for i in range(num_beads):
-        rfc[i] = np.sqrt(2 * e * T[i])
+        rfc[i] = torch.sqrt(2 * e * T[i])
 
-    np.random.seed(seed)
-
-    trj = np.zeros((num_trjs, num_beads, trj_len))
-    position = sampling(num_beads, T1, T2, num_trjs)
-
+    torch.manual_seed(seed)
+            
     for it in range(trj_len):
-        RanForce = np.random.normal(0, 1.0, (num_trjs, num_beads))
+        RanForce = torch.randn(num_trjs, num_beads, device=device)
         RanForce *= rfc
 
-        DriftForce = np.dot(position, Drift)
+        DriftForce = torch.einsum('ij,aj->ai', Drift, position)
 
         position += (DriftForce * dt + RanForce * dt2) / e
 
-        trj[:, :, it] = position
+        trj[:, it, :] = position
 
-    return trj.transpose(0, 2, 1)
+    return trj
 
 
 def p_ss(num_beads, x, T1, T2):
@@ -134,7 +139,7 @@ def p_ss(num_beads, x, T1, T2):
 
     if num_beads == 2:
         x1, x2 = x[:, :, 0], x[:, :, 1]
-        return np.exp(
+        return torch.exp(
             -0.5
             * (
                 4
@@ -149,7 +154,7 @@ def p_ss(num_beads, x, T1, T2):
 
     elif num_beads == 5:
         x1, x2, x3, x4, x5 = x[:, :, 0], x[:, :, 1], x[:, :, 2], x[:, :, 3], x[:, :, 4]
-        return np.exp(
+        return torch.exp(
             -0.5
             * (
                 (
@@ -267,10 +272,10 @@ def del_shannon_etpy(trj, T1, T2):
         num_beads == 5
     ), "'number of beads' in 'trj' must be 2 or 5"
 
-    etpy_prev = -np.log(p_ss(num_beads, trj[:, :-1, :], T1, T2))
-    etpy_next = -np.log(p_ss(num_beads, trj[:, 1:, :], T1, T2))
+    etpy_prev = -torch.log(p_ss(num_beads, trj[:, :-1, :], T1, T2))
+    etpy_next = -torch.log(p_ss(num_beads, trj[:, 1:, :], T1, T2))
 
-    return (etpy_next - etpy_prev).astype(np.float32)
+    return etpy_next - etpy_prev
 
 
 def del_medium_etpy(trj, T1, T2):
@@ -291,8 +296,8 @@ def del_medium_etpy(trj, T1, T2):
         num_beads == 5
     ), "'number of beads' in 'trj' must be 2 or 5"
 
-    Drift = np.zeros((num_beads, num_beads))
-    T = np.linspace(T1, T2, num_beads)
+    Drift = torch.zeros(num_beads, num_beads).to(trj.device)
+    T = torch.linspace(T1, T2, num_beads).to(trj.device)
 
     for i in range(num_beads):
         if i > 0:
@@ -305,12 +310,12 @@ def del_medium_etpy(trj, T1, T2):
     x_next = trj[:, 1:, :]
     dx = x_next - x_prev
 
-    Fx = np.dot((x_next + x_prev)/2, Drift)
+    Fx = ((x_next + x_prev)/2) @ Drift
 
     dQ = Fx * dx
-    etpy = np.sum(dQ / T, axis=2)
+    etpy = torch.sum(dQ / T, dim=2)
 
-    return etpy.astype(np.float32)
+    return etpy
 
 
 def analytic_etpy(num_beads, T1, T2):
