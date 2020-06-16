@@ -43,3 +43,18 @@ def logging(i, loss, time_step, preds, train=True):
         print("Test   iter: %d  loss: %1.4e  pred: %.5f" % (i, loss, pred_rate))
 
     return tmp
+
+def logging_rneep(i, loss, seq_len, preds, train=True):
+    tmp = {}
+    pred = preds.flatten()
+    cum_pred = np.cumsum(pred)
+    slope, _, _, _, _ = stats.linregress(np.arange(len(cum_pred)) * (seq_len-1), cum_pred)
+    tmp["iteration"] = i
+    tmp["loss"] = loss
+    tmp["pred_rate"] = slope
+    if train:
+        print("Train  iter: %d  loss: %1.4e  pred: %.5f" % (i, loss, slope))
+    else:
+        print("Test   iter: %d  loss: %1.4e  pred: %.5f" % (i, loss, slope))
+
+    return tmp
