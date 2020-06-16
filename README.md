@@ -37,6 +37,73 @@ See the following notebooks for the runs in the paper.
 ### RNEEP for Non-Markovian process
 * [`notebooks/partial-ratchet-RNEEP.ipynb`](notebooks/partial-ratchet-RNEEP.ipynb)
 
+## Usage
+
+See option details by running following command
+```
+python train_bead_spring.py --help
+```
+
+### Command line running examples
+
+* Bead-spring models (two- and five-bead model).
+
+The training process is logged in `results/bead_spring` directory. Every training iteration of `record-freq`, 1,000 in this example, train loss (column name: "loss") and estimation of entropy production (EP) rate ("pred_rate") from training set are logged `results/bead_spring/train_log.csv`. And test loss ("loss"), best test loss ("best_loss"), and estimation of EP rate ("pred_rate", "best_pred_rate") from test set are logged in `results/bead_spring/test_log.csv`.
+
+```bash
+python train_bead_spring.py \
+  --Tc 1 \
+  --Th 10 \
+  --save results/bead_spring \
+  --n-layer 3 \
+  --n-hidden 256 \
+  --n-bead 2 \
+  --n-iter 100000 \
+  --record-freq 1000 \
+  --seed 5
+```
+
+* High-dimensional bead-spring models (N=8, 16, 32, 64, and 128).
+
+```bash
+python train_bead_spring_high.py \
+  --save results/bead_spring_high \
+  --n-layer 3 \
+  --n-hidden 256 \
+  --n-bead 8 \
+  --n-iter 1000000 \
+  --record-freq 10000 \
+  --normalize \
+  --seed 5
+```
+
+* Discrete flashing ratchet models.
+
+```bash
+python train_ratchet.py \
+  --potential 2 \
+  --save results/full_ratchet \
+  --n-layer 1 \
+  --n-hidden 128 \
+  --n-iter 50000 \
+  --record-freq 100 \
+  --seed 5
+```
+
+* partial infromation ratchet model (RNEEP with sequence length `seq-len`).
+
+```bash
+python train_ratchet_partial.py \
+  --potential 2 \
+  --save results/partial_ratchet \
+  --seq-len 32 \
+  --n-layer 1 \
+  --n-hidden 128 \
+  --n-iter 100000 \
+  --record-freq 1000 \
+  --seed 5
+```
+
 ## Author
 Dong-Kyum Kim, Youngkyoung Bae, Sangyun Lee and Hawoong Jeong
 
