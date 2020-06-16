@@ -1,21 +1,16 @@
 import argparse
 import json
 import os
-import pickle
-from argparse import Namespace
-from collections import Counter
-from copy import deepcopy
 
 import numpy as np
 import pandas as pd
 import torch
-import torch.nn as nn
-from scipy import stats
 from tqdm import tqdm
 
 from misc.sampler import CartesianSampler
 from misc.utils import logging_rneep, save_checkpoint
 from model.net import EmbeddingNEEP
+from toy.ratchet import simulation
 
 
 def train(opt, model, optim, trajs, sampler):
