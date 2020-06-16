@@ -1,3 +1,5 @@
+
+---
 # NEEP: Neural Estimator for Entropy Production
 
 [![Paper](http://img.shields.io/badge/paper-arxiv.2003.04166-B31B1B.svg)](https://arxiv.org/abs/2003.04166)
@@ -13,8 +15,9 @@ This repo contains source code for the runs in [Learning entropy production via 
 ```bash
 git clone https://github.com/kdkyum/neep
 cd neep
-conda env create -f environment.yml
+conda create -y --name neep python=3.6
 conda activate neep
+pip install -r requirements.txt
 python -m ipykernel install --name neep
 ```
 
