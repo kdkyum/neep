@@ -48,7 +48,7 @@ python train_bead_spring.py --help
 
 * Bead-spring models (two- and five-bead model).
 
-The training process is logged in `results/bead_spring` directory. Every training iteration of `record-freq`, 1,000 in this example, train loss (column name: "loss") and estimation of entropy production (EP) rate ("pred_rate") from training set are logged `results/bead_spring/train_log.csv`. And test loss ("loss"), best test loss ("best_loss"), and estimation of EP rate ("pred_rate", "best_pred_rate") from test set are logged in `results/bead_spring/test_log.csv`.
+The training process is logged in `results/bead_spring` directory. Every training iteration of `record-freq`, 1,000 in this example, train loss (column name: "loss") and estimation of entropy production (EP) rate ("pred_rate") from training set are logged in `results/bead_spring/train_log.csv`. And test loss ("loss"), best test loss ("best_loss"), and estimation of EP rate ("pred_rate", "best_pred_rate") from test set are logged in `results/bead_spring/test_log.csv`.
 
 ```bash
 python train_bead_spring.py \
@@ -95,6 +95,7 @@ python train_ratchet.py \
 ```bash
 python train_ratchet_partial.py \
   --potential 2 \
+  --n-step 10000000 \
   --save results/partial_ratchet \
   --seq-len 32 \
   --n-layer 1 \
