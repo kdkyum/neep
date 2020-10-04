@@ -2,10 +2,9 @@
 ---
 # NEEP: Neural Estimator for Entropy Production
 
-[![Paper](http://img.shields.io/badge/paper-arxiv.2003.04166-B31B1B.svg)](https://arxiv.org/abs/2003.04166)
+[![PRL](http://img.shields.io/badge/PRL-PhysRevLett.125.140604-517E66.svg)](https://link.aps.org/doi/10.1103/PhysRevLett.125.140604)
+[![arxiv](http://img.shields.io/badge/arXiv-2003.04166-B31B1B.svg)](https://arxiv.org/abs/2003.04166)
 [![LICENSE](https://img.shields.io/github/license/kdkyum/neep.svg)](https://github.com/kdkyum/neep/blob/master/LICENSE)
-![GitHub issues](https://img.shields.io/github/issues/kdkyum/neep.svg)
-[![GitHub stars](https://img.shields.io/github/stars/kdkyum/neep.svg)](https://github.com/kdkyum/neep/stargazers)
 
 ## Introduction
 
@@ -112,13 +111,21 @@ Dong-Kyum Kim, Youngkyoung Bae, Sangyun Lee and Hawoong Jeong
 Cite following bibtex.
 ```bibtex
 @article{kim2020learning,
-  title={Learning entropy production via neural networks},
-  author={Dong-Kyum Kim and Youngkyoung Bae and Sangyun Lee and Hawoong Jeong},
-  journal={arXiv preprint arXiv:2003.04166},
-  year={2020}
+  title = {Learning Entropy Production via Neural Networks},
+  author = {Kim, Dong-Kyum and Bae, Youngkyoung and Lee, Sangyun and Jeong, Hawoong},
+  journal = {Phys. Rev. Lett.},
+  volume = {125},
+  issue = {14},
+  pages = {140604},
+  numpages = {6},
+  year = {2020},
+  month = {Oct},
+  publisher = {American Physical Society},
+  doi = {10.1103/PhysRevLett.125.140604},
+  url = {https://link.aps.org/doi/10.1103/PhysRevLett.125.140604}
 }
 ```
 
 ## License
 
-This project following MIT License as written in LICENSE file.
+This project following MIT License.
