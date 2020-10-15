@@ -6,6 +6,18 @@
 [![arxiv](http://img.shields.io/badge/arXiv-2003.04166-B31B1B.svg)](https://arxiv.org/abs/2003.04166)
 [![LICENSE](https://img.shields.io/github/license/kdkyum/neep.svg)](https://github.com/kdkyum/neep/blob/master/LICENSE)
 
+Authors: Dong-Kyum Kim<sup>1*</sup>, Youngkyoung Bae<sup>1*</sup>, Sangyun Lee<sup>1</sup> and Hawoong Jeong<sup>1,2</sup><br>
+<sub>\* Equal contribution</sub>
+
+<sup>1</sup> <sub>Department of Physics, KAIST</sub>
+<sup>2</sup> <sub>Center for Complex Systems, KAIST</sub>
+
+## Summary
+
+We developed the neural estimator for entropy production (NEEP), a novel type of estimator that evaluates entropy production from the trajectories of system variables by deep learning. In the macroscopic world, entropy never decreases as time moves forward; for instance, spilled water will not spontaneously jump back into its cup. However, entropy can in fact transiently decrease in small systems due to environmental fluctuations. Physicists have found that such an entropy difference, called *entropy production* (EP), can be measured by estimating the probability that a time-reversed trajectory, which is like playing a recorded video from an experiment backward, will be observed. Various EP estimators based on this method have been developed, but the required trajectory data needs to first be divided into discrete microstates. In contrast to these conventional methods, NEEP does not require such detailed information to estimate the probability of time-reversed trajectories, and further, NEEP can efficiently learn EP from data even in high-dimensional space. We additionally verified that our approach is even applicable to time-series data with unobservable variables. We expect NEEP to be beneficial in applications to intricately organized systems where numerous variables are entangled and hidden, such as biological systems, active matter, and others, for a deeper look into their complex dynamics.
+
+<div style="text-align:center"><img src="neep.png" width="600px"/></div>
+
 ## Introduction
 
 This repo contains source code for the runs in [Learning entropy production via neural networks](https://arxiv.org/abs/2003.04166)
@@ -38,7 +50,7 @@ See the following notebooks for the runs in the paper.
 
 ## Usage
 
-See option details by running following command
+See option details by running the following command
 ```
 python train_bead_spring.py --help
 ```
@@ -89,7 +101,7 @@ python train_ratchet.py \
   --seed 5
 ```
 
-* partial infromation ratchet model (RNEEP with sequence length `seq-len`).
+* partial information ratchet model (RNEEP with sequence length `seq-len`).
 
 ```bash
 python train_ratchet_partial.py \
@@ -104,11 +116,8 @@ python train_ratchet_partial.py \
   --seed 5
 ```
 
-## Author
-Dong-Kyum Kim, Youngkyoung Bae, Sangyun Lee and Hawoong Jeong
-
 ## Bibtex
-Cite following bibtex.
+Cite the following Bibtex.
 ```bibtex
 @article{kim2020learning,
   title = {Learning Entropy Production via Neural Networks},
@@ -128,4 +137,4 @@ Cite following bibtex.
 
 ## License
 
-This project following MIT License.
+This project following MIT license.
