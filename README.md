@@ -16,7 +16,7 @@ Authors: Dong-Kyum Kim<sup>1*</sup>, Youngkyoung Bae<sup>1*</sup>, Sangyun Lee<s
 
 We developed the neural estimator for entropy production (NEEP), a novel type of estimator that evaluates entropy production from the trajectories of system variables by deep learning. In the macroscopic world, entropy never decreases as time moves forward; for instance, spilled water will not spontaneously jump back into its cup. However, entropy can in fact transiently decrease in small systems due to environmental fluctuations. Physicists have found that such an entropy difference, called *entropy production* (EP), can be measured by estimating the probability that a time-reversed trajectory, which is like playing a recorded video from an experiment backward, will be observed. Various EP estimators based on this method have been developed, but the required trajectory data needs to first be divided into discrete microstates. In contrast to these conventional methods, NEEP does not require such detailed information to estimate the probability of time-reversed trajectories, and further, NEEP can efficiently learn EP from data even in high-dimensional space. We additionally verified that our approach is even applicable to time-series data with unobservable variables. We expect NEEP to be beneficial in applications to intricately organized systems where numerous variables are entangled and hidden, such as biological systems, active matter, and others, for a deeper look into their complex dynamics.
 
-<div style="text-align:center"><img src="neep.png" width="600px"/></div>
+<center><img src="neep.png" width="600px"/></center>
 
 ## Introduction
 
@@ -137,4 +137,4 @@ Cite the following Bibtex.
 
 ## License
 
-This project following MIT license.
+This project following the MIT license.
